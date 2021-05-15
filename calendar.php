@@ -169,6 +169,14 @@ if (!$error) {
             background-image: url('images/outlook.svg');
         }
         
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #8a6d3b;
+            background-color: #fcf8e3;
+            border-color: #faebcc;
+        }
         
 
     </style>
@@ -190,6 +198,11 @@ if (!$error) {
         <?php else: ?>
         
         <p>🗓️ <?= $name ?></p>
+        
+        <?php if($startDate < new DateTime()): ?>
+            <p class="alert">⚠️ This event is in the past.</p>
+        <?php endif ?>
+        
         
         <ul>
             
