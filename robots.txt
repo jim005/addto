@@ -1,0 +1,10 @@
+#
+# robots.txt
+#
+# This optimized file for Drupal 7 is hosted 
+# here https://github.com/jim005/d7-robots.txt 
+#
+# Feel free to share feedback 
+#
+User-agent: *
+Disallow: /
