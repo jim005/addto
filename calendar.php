@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL);
 require_once 'vendor/autoload.php';
 use Spatie\CalendarLinks\Link;
 
@@ -74,47 +73,52 @@ if (!$error) {
 
     <style type="text/css">
         :root {
-          --color-gris: #333;
-          --color-gris-clair: #999;
-        
+            --color-gris: #333;
+            --color-gris-clair: #999;
         }
-    
+
         body {
             line-height: 1.65;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
             text-align: center;
             margin-top: 2rem;
         }
+
         .container {
             max-width: 42rem;
             margin-left: auto;
             margin-right: auto;
         }
-        
+
         header h1 {
             color: var(--color-gris);
         }
-        
-        
+
+
         header p,
         footer p,
         footer p a {
             color: var(--color-gris-clair);
         }
+
         footer p {
             font-size: 0.8rem;
         }
+
         main {
-            min-height: 50vh;  
+            min-height: 50vh;
         }
+
         ul {
             margin: 0;
             padding: 0;
         }
+
         ul li {
 
             list-style: none;
         }
+
         ul li a {
             padding: 1rem 0;
             display: inline-block;
@@ -129,11 +133,13 @@ if (!$error) {
             text-align: left;
             position: relative;
         }
-        ul li a:hover { 
+
+        ul li a:hover {
             background-color: var(--color-gris-clair);
             color: white;
             border-radius: 6px;
         }
+
         ul li a::before {
             content: "";
             width: 15px;
@@ -147,28 +153,33 @@ if (!$error) {
             -webkit-transform: translateX(-50%) rotate(45deg);
             transform: translateX(-50%) rotate(45deg);
         }
+
         ul li a:hover::before {
             border-top-color: white;
             border-right-color: white;
         }
-        
-        
+
+
         .apple a {
             background-image: url('images/apple.svg');
         }
+
         .google a {
             background-image: url('images/google.svg');
         }
+
         .ics a {
             background-image: url('images/ics.svg');
         }
+
         .yahoo a {
-           background-image: url('images/yahoo.svg');
+            background-image: url('images/yahoo.svg');
         }
+
         .weboutlook a {
             background-image: url('images/outlook.svg');
         }
-        
+
         .alert {
             padding: 15px;
             margin-bottom: 20px;
@@ -177,58 +188,57 @@ if (!$error) {
             background-color: #fcf8e3;
             border-color: #faebcc;
         }
-        
-
     </style>
 </head>
 
 <body>
-    
+
 <div class="container">
 
-    <header> 
+    <header>
         <h1>Add to calendar</h1>
     </header>
-    
+
     <main>
         <?php if ($error): ?>
 
             <?= $message ?>
-    
+
         <?php else: ?>
-        
-        <p>🗓️ <?= $name ?></p>
-        
-        <?php if($startDate < new DateTime()): ?>
-            <p class="alert">⚠️ This event is in the past.</p>
-        <?php endif ?>
-        
-        
-        <ul>
-            
-            <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
-            <li class="apple"><a href="<?= $link->ics() ?>">Apple Calendar</a></li>
-        
-            <!-- // Generate a link to create an event on Google calendar-->
-            <li class="google"><a href="<?= $link->google() ?>">Google Calendar</a></li>
-        
-            <!--// Generate a link to create an event on Yahoo calendar-->
-            <li class="yahoo"><a href="<?= $link->yahoo() ?>">Yahoo Calendar</a></li>
-        
-            <!--// Generate a link to create an event on outlook.com calendar-->
-            <li class="weboutlook"><a href="<?= $link->webOutlook() ?>">Web Outlook</a></li>
-        
-            <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
-            <li class="ics"><a href="<?= $link->ics() ?>">ICS : iCal & Outlook</a></li>
-        
-        </ul>
-        
-        
+
+            <p>🗓️ <?= $name ?></p>
+
+            <?php if ($startDate < new DateTime()): ?>
+                <p class="alert">⚠️ This event is in the past.</p>
+            <?php endif ?>
+
+
+            <ul>
+
+                <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
+                <li class="apple"><a href="<?= $link->ics() ?>">Apple Calendar</a></li>
+
+                <!-- // Generate a link to create an event on Google calendar-->
+                <li class="google"><a href="<?= $link->google() ?>">Google Calendar</a></li>
+
+                <!--// Generate a link to create an event on Yahoo calendar-->
+                <li class="yahoo"><a href="<?= $link->yahoo() ?>">Yahoo Calendar</a></li>
+
+                <!--// Generate a link to create an event on outlook.com calendar-->
+                <li class="weboutlook"><a href="<?= $link->webOutlook() ?>">Web Outlook</a></li>
+
+                <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
+                <li class="ics"><a href="<?= $link->ics() ?>">ICS : iCal & Outlook</a></li>
+
+            </ul>
+
+
         <?php endif ?>
     </main>
-    
+
     <footer>
-        <p>Source on <a href="github.com//jimm00" target="_blank">GitHub</a> for <a href="https://www.websenso.com" target="_blank">www.WebSenso.com</a></p>
+        <p>Source on <a href="https://github.com/jim005/addto" target="_blank">GitHub</a> for <a
+                    href="https://www.websenso.com" target="_blank">www.WebSenso.com</a></p>
     </footer>
 
 </div>
