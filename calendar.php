@@ -36,8 +36,14 @@ if (!$error) {
     $event = ($data[0]) ? $data[0] : $data;
 
     // Format data
+    $localTimeZone = new DateTimeZone('Europe/Paris');
+    
     $startDate = new DateTime($event['startDate']);
+    $startDate->setTimezone($localTimeZone);
+    
     $endDate = ($event['endDate']) ? new DateTime($event['endDate']) : (clone $startDate)->modify("+1 hour");
+    $endDate->setTimezone($localTimeZone);
+    
     $name = $event['name'];
     $description = $event['description'];
     $description .= '<br /><br />';
@@ -52,6 +58,7 @@ if (!$error) {
     // debug
     if ($_GET['debug']) {
         print "<pre>";
+        print_r($event['startDate']);
         print_r($startDate);
         print_r($endDate);
         print "</pre>";
@@ -97,11 +104,11 @@ if (!$error) {
             margin-right: auto;
         }
         quote {
-            border-left: 1px solid var(--color-gris-clair);
+            border-left: 1px dashed var(--color-gris-clair);
             display: block;
             text-align: left;
-            padding-left: 2rem;
-            margin-left: 40px;
+            padding-left: 1.5rem;
+            margin-left: 20px;
             margin-bottom: 2rem;
             color: var(--color-gris-clair);
             font-size: 0.8em;
@@ -220,8 +227,8 @@ if (!$error) {
 
             <quote>
                 <?= $name ?>
-                <br/>🕐 : <?= date_format($startDate,"Y - m - d H:i") ?> => <?= date_format($endDate,"Y - m - d H:i") ?>
-                <br/>📍 : <?= $address ?>
+                <br/>🕐 <?= date_format($startDate,"Y - m - d H:i") ?> => <?= date_format($endDate,"Y - m - d H:i") ?>
+                <br/>📍 <?= $address ?>
             </quote>
 
             <?php if ($startDate < new DateTime()): ?>
