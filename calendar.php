@@ -37,7 +37,7 @@ if (!$error) {
 
     // Format data
     $startDate = new DateTime($event['startDate']);
-    $endDate = new DateTime($event['endDate']);
+    $endDate = ($event['endDate']) ? new DateTime($event['endDate']) : (clone $startDate)->modify("+1 hour");
     $name = $event['name'];
     $description = $event['description'];
     $description .= '<br /><br />';
@@ -49,6 +49,13 @@ if (!$error) {
     $address .= $event['location']['address']['addressLocality'] . ', ';
     $address .= $event['location']['address']['addressCountry'];
 
+    // debug
+    if ($_GET['debug']) {
+        print "<pre>";
+        print_r($startDate);
+        print_r($endDate);
+        print "</pre>";
+    }
 
     // Create calendar links
     try {
@@ -89,13 +96,18 @@ if (!$error) {
             margin-left: auto;
             margin-right: auto;
         }
-
-        header h1 {
-            color: var(--color-gris);
+        quote {
+            border-left: 1px solid var(--color-gris-clair);
+            display: block;
+            text-align: left;
+            padding-left: 2rem;
+            margin-left: 40px;
+            margin-bottom: 2rem;
+            color: var(--color-gris-clair);
+            font-size: 0.8em;
         }
 
 
-        header p,
         footer p,
         footer p a {
             color: var(--color-gris-clair);
@@ -196,17 +208,21 @@ if (!$error) {
 <div class="container">
 
     <header>
-        <h1>Add to calendar</h1>
+        <h1>🗓</h1>
     </header>
 
     <main>
         <?php if ($error): ?>
 
-            <?= $message ?>
+             <p class="alert"><?= $message ?></p>
 
         <?php else: ?>
 
-            <p>🗓️ <?= $name ?></p>
+            <quote>
+                <?= $name ?>
+                <br/>🕐 : <?= date_format($startDate,"Y - m - d H:i") ?> => <?= date_format($endDate,"Y - m - d H:i") ?>
+                <br/>📍 : <?= $address ?>
+            </quote>
 
             <?php if ($startDate < new DateTime()): ?>
                 <p class="alert">⚠️ This event is in the past.</p>
@@ -216,7 +232,7 @@ if (!$error) {
             <ul>
 
                 <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
-                <li class="apple"><a href="<?= $link->ics() ?>">Apple Calendar</a></li>
+                <li class="apple"><a href="<?= $link->ics(['URL' => $event['url']]) ?>">Apple Calendar</a></li>
 
                 <!-- // Generate a link to create an event on Google calendar-->
                 <li class="google"><a href="<?= $link->google() ?>">Google Calendar</a></li>
@@ -228,9 +244,11 @@ if (!$error) {
                 <li class="weboutlook"><a href="<?= $link->webOutlook() ?>">Web Outlook</a></li>
 
                 <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
-                <li class="ics"><a href="<?= $link->ics() ?>">ICS : iCal & Outlook</a></li>
+                <li class="ics"><a href="<?= $link->ics(['URL' => $event['url']]) ?>">ICS : iCal & Outlook</a></li>
 
             </ul>
+            
+            <p><a href="<?= $event['url'] ?>">↩️</a></p>
 
 
         <?php endif ?>
