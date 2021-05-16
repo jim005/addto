@@ -227,7 +227,7 @@ if (!$error) {
 
             <quote>
                 <?= $name ?>
-                <br/>🕐 <?= date_format($startDate,"Y - m - d H:i") ?> => <?= date_format($endDate,"Y - m - d H:i") ?>
+                <br/>🕐 <?= date_format($startDate,"d M Y - H\hi") ?> ⏩  <?= date_format($endDate,"d M Y - H\hi") ?>
                 <br/>📍 <?= $address ?>
             </quote>
 
