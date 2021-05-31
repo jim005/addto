@@ -45,13 +45,13 @@ if (!$error) {
     $endDate->setTimezone($localTimeZone);
     
     $name = $event['name'];
-    $description = $event['description'];
-    $description .= '<br /><br />';
-    $description .= 'Source : ' . $event['url'];
+    $description = $event['description']; 
+    $description .= '\r\r Plus d\'info : ' . $event['url'];
 
     $address = '';
-    $address .= $event['location']['address']['streetAddress'] . ', ';
-    $address .= $event['location']['address']['postalCode'] . ' ';
+    $address .= ($event['location']['name']) ?  $event['location']['name'] . ', ' : '';
+    $address .= ($event['location']['address']['streetAddress']) ? $event['location']['address']['streetAddress'] . ', ' : '';
+    $address .= $event['location']['address']['postalCode'] . ' '; 
     $address .= $event['location']['address']['addressLocality'] . ', ';
     $address .= $event['location']['address']['addressCountry'];
 
@@ -81,7 +81,7 @@ if (!$error) {
 
 <head>
     <meta charset="utf-8">
-    <title>Add to Calendar</title>
+    <title>Add-to-Calendar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex"/>
 
