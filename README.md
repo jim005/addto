@@ -12,7 +12,7 @@ To export an event on any calendars from URL's with JSON-LD event data, open lin
 
 ```
 git clone https://github.com/jim005/addto.git
-composer update
+composer install
 ```
 
 Visitors should see /web folder only.
