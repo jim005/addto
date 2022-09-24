@@ -5,7 +5,6 @@ use Spatie\CalendarLinks\Link;
 
 // Fetch data
 $url = $_GET['url'];
-
 $c = file_get_contents($url);
 $d = new DomDocument();
 @$d->loadHTML($c);
@@ -34,6 +33,10 @@ if (!$error) {
 
     // Take only one event.
     $event = ($data[0]) ? $data[0] : $data;
+	if(!empty($event["@graph"]))
+    {
+    	$event = $event["@graph"][0];
+    }
 
     // Format data
     $localTimeZone = new DateTimeZone('Europe/Paris');
@@ -43,7 +46,7 @@ if (!$error) {
     
     $endDate = ($event['endDate']) ? new DateTime($event['endDate']) : (clone $startDate)->modify("+1 hour");
     $endDate->setTimezone($localTimeZone);
-    
+
     $name = $event['name'];
     $description = $event['description']; 
     $description .= '\r\r Plus d\'info : ' . $event['url'];
