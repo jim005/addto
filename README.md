@@ -19,6 +19,5 @@ Visitors should see /web folder only.
 
 ### Thanks
 
-### <https://github.com/spatie/calendar-links>
-
+<https://github.com/spatie/calendar-links>
 <https://www.websenso.com>

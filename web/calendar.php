@@ -80,10 +80,9 @@ try {
 }
 
 
-
 // HTML
 ?><!doctype html>
-<html class="no-js">
+<html class="no-js" lang="">
 
 <head>
     <meta charset="utf-8">
@@ -91,10 +90,11 @@ try {
     <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style type="text/css">
+    <style>
         :root {
             --color-gris       : #333;
             --color-gris-clair : #999;
+        	--background-color : #fff;
             }
 
         body {
@@ -102,6 +102,7 @@ try {
             font-family : 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
             text-align  : center;
             margin-top  : 2rem;
+        	background-color: var(--background-color);
             }
 
         .container {
@@ -110,7 +111,7 @@ try {
             margin-right : auto;
             }
 
-        quote {
+        .event {
             border-left   : 1px dashed var(--color-gris-clair);
             display       : block;
             text-align    : left;
@@ -131,7 +132,7 @@ try {
             font-size : 0.8rem;
             }
 
-        main {
+        .main {
             min-height : 50vh;
             }
 
@@ -225,19 +226,19 @@ try {
         <h1>🗓</h1>
     </header>
 
-    <main>
+    <div class="main">
       <?php if ($errorMessage): ?>
 
           <p class="alert"><?= $errorMessage ?></p>
 
       <?php else: ?>
 
-          <quote>
+          <div class="event">
             <?= $name ?>
               <br/>🕐 <?= date_format($startDate, "d M Y - H \h i") ?>
               ⏩ <?= date_format($endDate, "d M Y - H \h i") ?>
               <br/>📍 <?= $address ?>
-          </quote>
+          </div>
 
         <?php if ($startDate < new DateTime()): ?>
               <p class="alert">⚠️ This event is in the past.</p>
@@ -274,7 +275,7 @@ try {
 
 
       <?php endif ?>
-    </main>
+    </div>
 
     <footer>
         <p>Source on <a href="https://github.com/jim005/addto" target="_blank" rel="external nofollow">GitHub</a>
