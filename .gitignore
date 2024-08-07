@@ -1,2 +1,5 @@
 vendor/
 composer.lock
+web/icon
+web/awstats-icon
+web/awstatsicons

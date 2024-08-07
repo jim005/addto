@@ -7,6 +7,19 @@ function detectBrowserLanguage() {
 }
 
 
+function formatDateText($startDate, $endDate, $allDay, $locale) {
+    $formatter = new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::SHORT);
+    $formatter->setPattern($allDay ? 'd MMMM y' : 'd MMMM y - HH:mm');
+
+    if ($startDate->getTimestamp() === $endDate->getTimestamp()) {
+        return $formatter->format($startDate);
+    } else {
+        return $formatter->format($startDate) . ' ⏩ ' . $formatter->format($endDate);
+    }
+}
+
+
+
 /**
  * Fetch LD-JSON data from an URL
  *

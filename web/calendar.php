@@ -45,10 +45,7 @@ if (!$allDay && $startDate == $endDate) {
     $endDate->modify('+1 hour');
 }
 
-$format = $allDay ? 'd M Y' : 'd M Y - H \h i';
-$dateText = $startDate->getTimestamp() === $endDate->getTimestamp() ?
-    $startDate->format($format) :
-    $startDate->format($format) . ' ⏩ ' . $endDate->format($format);
+$dateText = formatDateText($startDate, $endDate, $allDay, $lang);
 
 $description = $event['description'] . ' ' . $event['url'];
 
@@ -73,6 +70,7 @@ $link = Link::create($event['name'], $startDate, $endDate, $allDay)
         <h1>🗓 <?= htmlspecialchars($trans['title']) ?></h1>
     </header>
     <main>
+        
         <?php if (!empty($errorMessage)): ?>
             <p class="alert"><?= htmlspecialchars($errorMessage) ?></p>
         <?php else: ?>
@@ -81,9 +79,11 @@ $link = Link::create($event['name'], $startDate, $endDate, $allDay)
                 <br/>🕐 <?= htmlspecialchars($dateText) ?>
                 <br/>📍 <?= htmlspecialchars($event['address']) ?>
             </div>
+            
             <?php if ($startDate < new DateTime()): ?>
                 <p class="alert"><?= htmlspecialchars($trans['obsolete']) ?></p>
             <?php endif ?>
+            
             <ul>
                 <li class="apple"><a href="<?= htmlspecialchars($link->ics(['URL' => $event['url']])) ?>" rel="external nofollow"><?= htmlspecialchars($trans['apple_calendar']) ?></a></li>
                 <li class="google"><a href="<?= htmlspecialchars($link->google()) ?>" rel="external nofollow"><?= htmlspecialchars($trans['google_calendar']) ?></a></li>
