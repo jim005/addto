@@ -1,23 +1,36 @@
-# Create calendar's links from any URLs within JSON-LD data.
+# Create Calendar Links from Any URLs with LD-JSON Data
 
-To export an event on any calendars from URL's with JSON-LD event data, open link to /calendar.php?url=[YOUR_URL]
+Generate calendar events from URLs containing LD-JSON event data by visiting:
 
-### Demo
+`/calendar.php?url=[YOUR_URL]`
 
-<https://addto.appsenso.eu/calendar.php?url=https://www.lepetitoiseau.fr/fiche/arrivee-pere-noel>
+## Demo
 
-<https://addto.appsenso.eu/> is available for free. You could add links from yours pages.
+View a working example:
 
-### Install
+[Calendar Link Demo](https://addto.appsenso.eu/calendar.php?url=https://www.ville-embrun.fr/evenements/visite-guidee-cathedrale-dembrun-dame-real-800-ans)
 
-```
-git clone https://github.com/jim005/addto.git
-composer install
-```
+You can use [addto.appsenso.eu](https://addto.appsenso.eu/) for free to add links to your pages.
 
-Visitors should see /web folder only.
+## Installation
 
-### Thanks
+To set up the project, follow these steps:
 
-<https://github.com/spatie/calendar-links>
-<https://www.websenso.com>
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/jim005/addto.git
+   ```
+
+2. Install dependencies:
+   ```bash
+   composer install
+   ```
+
+Ensure that visitors only have access to the `/web` folder.
+
+## Acknowledgements
+
+Special thanks to:
+
+- [Spatie Calendar Links](https://github.com/spatie/calendar-links)
+- [WebSenso](https://www.websenso.com)

@@ -1,290 +1,102 @@
 <?php
 require_once '../vendor/autoload.php';
 use Spatie\CalendarLinks\Link;
+require_once 'functions.php';
 
-try {
-// Fetch data
-  $urlToFetch = $_GET['url'];
-  if (empty($urlToFetch)) {
-    throw new Exception('can\'t find URL to fetch');
-  }
-  $contentToFetch = file_get_contents($urlToFetch);
-  if ($contentToFetch === FALSE) {
-    throw new Exception('can\'t fetch URL\'s content');
-  }
-  $contentToParse = new DomDocument();
-  @$contentToParse->loadHTML($contentToFetch);
+// Detect browser language
+$browserLang = detectBrowserLanguage();
+$lang = substr($browserLang, 0, 2); // Get the first two characters of the language code
+$lang = in_array($lang, ['en', 'fr']) ? $lang : 'en'; // Default to English if not supported
 
-  // parse the HTML to retrieve the "ld+json" only
-  $xp          = new domxpath($contentToParse);
-  $jsonScripts = $xp->query('//script[@type="application/ld+json"]');
-  $json        = trim($jsonScripts->item(0)->nodeValue); // get the first script only (it should be unique anyway)
-  $eventData        = json_decode($json, TRUE);
+// Fetch translations
+$trans = $translations[$lang];
 
-  if (empty($eventData)) {
-    throw new Exception('No data');
-  }
-
-// debug
-  if ($_GET['debug']) {
-    print "<pre>";
-    print_r($eventData);
-    print "</pre>";
-  }
-
-// Display links
-
-  $event = ($eventData[0]) ? $eventData[0] : $eventData;   // Take only one event.
-  if (!empty($event["@graph"])) {
-    $event = $event["@graph"][0];
-  }
-
-  // Format data
-  $localTimeZone = new DateTimeZone('Europe/Paris');
-
-  $startDate = new DateTime($event['startDate']);
-  $startDate->setTimezone($localTimeZone);
-
-  $endDate = ($event['endDate']) ? new DateTime($event['endDate']) : (clone $startDate)->modify("+1 hour");
-  $endDate->setTimezone($localTimeZone);
-
-  $name        = $event['name'];
-  $description = $event['description'];
-  $description .= '\r\r Plus d\'info : ' . $event['url'];
-
-  $address = '';
-  $address .= ($event['location']['name']) ? $event['location']['name'] . ', ' : '';
-  $address .= ($event['location']['address']['streetAddress']) ? $event['location']['address']['streetAddress'] . ', ' : '';
-  $address .= $event['location']['address']['postalCode'] . ' ';
-  $address .= $event['location']['address']['addressLocality'] . ', ';
-  $address .= $event['location']['address']['addressCountry'];
-
-  // debug
-  if ($_GET['debug']) {
-    print "<pre>";
-    print_r($event['startDate']);
-    print_r($startDate);
-    print_r($endDate);
-    print "</pre>";
-  }
-
-  // Create calendar links
-  $link = Link::create($name, $startDate, $endDate);
-  $link->description($description);
-  $link->address($address);
-
-
-} catch (Exception $e) {
-  http_response_code(400); // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
-  $errorMessage = "Error: " . $e->getMessage();
+// Fetch and validate URL parameter
+$urlToFetch = filter_input(INPUT_GET, 'url', FILTER_VALIDATE_URL);
+if (!$urlToFetch) {
+    die('No valid URL to fetch');
 }
 
+// Fetch event data
+$eventData = fetchUrl($urlToFetch);
+$event = extractEventDataFromLdJson($eventData);
 
-// HTML
-?><!doctype html>
-<html class="no-js" lang="">
+// Debug mode
+if (!empty($_GET['debug'])) {
+    echo '<pre>';
+    var_dump($event);
+    echo '</pre>';
+    exit;
+}
 
+// Process event data
+$event = is_array($event) && isset($event[0]) ? $event[0] : $event;
+if (isset($event["@graph"])) {
+    $event = $event["@graph"][0];
+}
+
+// Format data
+$localTimeZone = new DateTimeZone('Europe/Paris');
+$startDate = new DateTime($event['start'], $localTimeZone);
+$endDate = isset($event['end']) ? new DateTime($event['end'], $localTimeZone) : clone $startDate;
+
+$allDay = $startDate->format('H:i:s') === '00:00:00' && $endDate->format('H:i:s') === '00:00:00';
+if (!$allDay && $startDate == $endDate) {
+    $endDate->modify('+1 hour');
+}
+
+$format = $allDay ? 'd M Y' : 'd M Y - H \h i';
+$dateText = $startDate->getTimestamp() === $endDate->getTimestamp() ?
+    $startDate->format($format) :
+    $startDate->format($format) . ' ⏩ ' . $endDate->format($format);
+
+$description = $event['description'] . ' ' . $event['url'];
+
+// Create calendar links
+$link = Link::create($event['name'], $startDate, $endDate, $allDay)
+    ->description($description)
+    ->address($event['address']);
+
+?>
+<!doctype html>
+<html lang="<?= $lang ?>">
 <head>
     <meta charset="utf-8">
-    <title>Add -to-Calendar</title>
-    <meta name="robots" content="noindex, nofollow, noarchive">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style>
-        :root {
-            --color-gris       : #333;
-            --color-gris-clair : #999;
-        	--background-color : #fff;
-            }
-
-        body {
-            line-height : 1.65;
-            font-family : 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            text-align  : center;
-            margin-top  : 2rem;
-        	background-color: var(--background-color);
-            }
-
-        .container {
-            max-width    : 42rem;
-            margin-left  : auto;
-            margin-right : auto;
-            }
-
-        .event {
-            border-left   : 1px dashed var(--color-gris-clair);
-            display       : block;
-            text-align    : left;
-            padding-left  : 1.5rem;
-            margin-left   : 20px;
-            margin-bottom : 2rem;
-            color         : var(--color-gris-clair);
-            font-size     : 0.8em;
-            }
-
-
-        footer p,
-        footer p a {
-            color : var(--color-gris-clair);
-            }
-
-        footer p {
-            font-size : 0.8rem;
-            }
-
-        .main {
-            min-height : 50vh;
-            }
-
-        ul {
-            margin  : 0;
-            padding : 0;
-            }
-
-        ul li {
-
-            list-style : none;
-            }
-
-        ul li a {
-            padding             : 1rem 0;
-            display             : inline-block;
-            padding-left        : 80px;
-            width               : calc(100% - 80px);
-            text-decoration     : none;
-            color               : black;
-            background-repeat   : no-repeat;
-            background-size     : 35px;
-            background-position : 20px center;
-            margin              : 0;
-            text-align          : left;
-            position            : relative;
-            }
-
-        ul li a:hover {
-            background-color : var(--color-gris-clair);
-            color            : white;
-            border-radius    : 6px;
-            }
-
-        ul li a::before {
-            content           : "";
-            width             : 15px;
-            height            : 15px;
-            display           : block;
-            border-top        : 1px solid var(--color-gris);
-            border-right      : 1px solid var(--color-gris);
-            position          : absolute;
-            top               : 22px;
-            right             : 22px;
-            -webkit-transform : translateX(-50%) rotate(45deg);
-            transform         : translateX(-50%) rotate(45deg);
-            }
-
-        ul li a:hover::before {
-            border-top-color   : white;
-            border-right-color : white;
-            }
-
-
-        .apple a {
-            background-image : url('/images/apple.svg');
-            }
-
-        .google a {
-            background-image : url('/images/google.svg');
-            }
-
-        .ics a {
-            background-image : url('/images/ics.svg');
-            }
-
-        .yahoo a {
-            background-image : url('/images/yahoo.svg');
-            }
-
-        .weboutlook a {
-            background-image : url('/images/outlook.svg');
-            }
-
-        .alert {
-            padding          : 15px;
-            margin-bottom    : 20px;
-            border-radius    : 4px;
-            color            : #8a6d3b;
-            background-color : #fcf8e3;
-            border-color     : #faebcc;
-            }
-    </style>
+    <title><?= htmlspecialchars($trans['title']) ?></title>
+    <meta name="robots" content="noindex, nofollow, noarchive"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="/css/style.css" type="text/css"/>
 </head>
-
 <body>
-
 <div class="container">
-
     <header>
-        <h1>🗓</h1>
+        <h1>🗓 <?= htmlspecialchars($trans['title']) ?></h1>
     </header>
-
-    <div class="main">
-      <?php if ($errorMessage): ?>
-
-          <p class="alert"><?= $errorMessage ?></p>
-
-      <?php else: ?>
-
-          <div class="event">
-            <?= $name ?>
-              <br/>🕐 <?= date_format($startDate, "d M Y - H \h i") ?>
-              ⏩ <?= date_format($endDate, "d M Y - H \h i") ?>
-              <br/>📍 <?= $address ?>
-          </div>
-
-        <?php if ($startDate < new DateTime()): ?>
-              <p class="alert">⚠️ This event is in the past.</p>
+    <main>
+        <?php if (!empty($errorMessage)): ?>
+            <p class="alert"><?= htmlspecialchars($errorMessage) ?></p>
+        <?php else: ?>
+            <div class="event">
+                <?= htmlspecialchars($event['name']) ?>
+                <br/>🕐 <?= htmlspecialchars($dateText) ?>
+                <br/>📍 <?= htmlspecialchars($event['address']) ?>
+            </div>
+            <?php if ($startDate < new DateTime()): ?>
+                <p class="alert"><?= htmlspecialchars($trans['obsolete']) ?></p>
+            <?php endif ?>
+            <ul>
+                <li class="apple"><a href="<?= htmlspecialchars($link->ics(['URL' => $event['url']])) ?>" rel="external nofollow"><?= htmlspecialchars($trans['apple_calendar']) ?></a></li>
+                <li class="google"><a href="<?= htmlspecialchars($link->google()) ?>" rel="external nofollow"><?= htmlspecialchars($trans['google_calendar']) ?></a></li>
+                <li class="yahoo"><a href="<?= htmlspecialchars($link->yahoo()) ?>" rel="external nofollow"><?= htmlspecialchars($trans['yahoo_calendar']) ?></a></li>
+                <li class="weboutlook"><a href="<?= htmlspecialchars($link->webOutlook()) ?>" rel="external nofollow"><?= htmlspecialchars($trans['web_outlook']) ?></a></li>
+                <li class="ics"><a href="<?= htmlspecialchars($link->ics(['URL' => $event['url']])) ?>" rel="external nofollow"><?= htmlspecialchars($trans['ics']) ?></a></li>
+            </ul>
+            <p><a href="<?= htmlspecialchars($event['url']) ?>"><?= htmlspecialchars($trans['back']) ?></a></p>
         <?php endif ?>
-
-
-          <ul>
-
-              <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
-              <li class="apple"><a
-                          href="<?= $link->ics(['URL' => $event['url']]) ?>" rel="external nofollow">Apple
-                      Calendar</a></li>
-
-              <!-- // Generate a link to create an event on Google calendar-->
-              <li class="google"><a href="<?= $link->google() ?>" rel="external nofollow">Google
-                      Calendar</a></li>
-
-              <!--// Generate a link to create an event on Yahoo calendar-->
-              <li class="yahoo"><a href="<?= $link->yahoo() ?>" rel="external nofollow">Yahoo
-                      Calendar</a></li>
-
-              <!--// Generate a link to create an event on outlook.com calendar-->
-              <li class="weboutlook"><a href="<?= $link->webOutlook() ?>" rel="external nofollow">Web
-                      Outlook</a></li>
-
-              <!--// Generate a data uri for an ics file (for iCal & Outlook)-->
-              <li class="ics"><a
-                          href="<?= $link->ics(['URL' => $event['url']]) ?>"  rel="external nofollow">ICS
-                      : iCal & Outlook</a></li>
-
-          </ul>
-
-          <p><a href="<?= $event['url'] ?>">↩️</a></p>
-
-
-      <?php endif ?>
-    </div>
-
+    </main>
     <footer>
-        <p>Source on <a href="https://github.com/jim005/addto" target="_blank" rel="external nofollow">GitHub</a>
-            -
-            Made by <a href="https://www.websenso.com" target="_blank" rel="external">WebSenso.com</a>
-        </p>
+        <p><?= htmlspecialchars($trans['github_source']) ?> <a href="https://github.com/jim005/addto" rel="external nofollow">GitHub</a> - <?= htmlspecialchars($trans['made_by']) ?> <a href="https://www.websenso.com" rel="external">WebSenso.com</a></p>
     </footer>
-
 </div>
-
 </body>
 </html>
