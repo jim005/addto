@@ -29,6 +29,11 @@ if (!empty($_GET['debug'])) {
     exit;
 }
 
+if (!is_array($event)) {
+    print $event;
+    exit;
+}
+
 // Process event data
 $event = is_array($event) && isset($event[0]) ? $event[0] : $event;
 if (isset($event["@graph"])) {

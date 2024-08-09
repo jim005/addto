@@ -121,6 +121,13 @@ function extractEventDataFromLdJson($eventData)
         "description" => $event["description"] ?? '',
         "url" => $event["url"] ?? ''
     );
+    
+    
+    if (!isValidDate($eventDetails['start'], 'Y-m-d H:i:s')) {
+        return "Invalid date format";
+    }
+    
+    
 
     if (isset($event["location"]["address"])) {
         $location = $event["location"]["address"];
@@ -139,6 +146,16 @@ function extractEventDataFromLdJson($eventData)
     return $eventDetails;
 }
 
+function isValidDate($date, $format = 'Y-m-d H:i:s') {
+    $dateTime = DateTime::createFromFormat($format, $date);
+    $errors = DateTime::getLastErrors();
+
+    if ($errors['error_count'] == 0 && $errors['warning_count'] == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 $translations = [
     'en' => [
